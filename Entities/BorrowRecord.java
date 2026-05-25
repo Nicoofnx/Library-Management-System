@@ -1,3 +1,4 @@
+package Entities;
 import java.time.LocalDate;
 
 public class BorrowRecord {
@@ -27,24 +28,42 @@ public class BorrowRecord {
     }
 
     // GETTERS
+
+    //Getter user
     public User getUser() {
         return user;
     }
 
+    //Getter book
     public Book getBook() {
         return book;
     }
 
+    //Getter fecha de prestamo
     public LocalDate getBorrowDate() {
         return borrowDate;
     }
 
+    //Getter fecha de devolucion
     public LocalDate getReturnDate() {
         return returnDate;
     }
 
+    //Getter estado devuelto del libro
     public boolean isReturned() {
         return returned;
+    }
+
+    //SETTERS
+
+    //Setter user
+    public void setUser(User user){
+        this.user = user;
+    }
+
+    //Setter book
+    public void setBook(Book book){
+        this.book = book;
     }
 
     @Override

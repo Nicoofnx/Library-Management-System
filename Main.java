@@ -1,126 +1,181 @@
+import ConsolePrinter.Printer;
+import Entities.Admin;
+import Entities.Book;
+import Entities.Client;
+
+import Repositories.BookRepository;
+import Repositories.BorrowRepository;
+import Repositories.UserRepository;
+
+import Services.BookService;
+import Services.BorrowService;
+import Services.UserService;
+
 public class Main {
-    public static void main(String[] args){
 
+    //Debug prop gpt xdxdxd
+    public static void main(String[] args) {
 
-        Library library = new Library();
+        // =========================================
+        // PRINTER
+        // =========================================
 
-        // ================= USERS =================
-        Client nico = library.addClientUser(
-            "Nicolai",
-            "Juarez"
+        Printer printer = new Printer();
+
+        // =========================================
+        // REPOSITORIES
+        // =========================================
+
+        UserRepository userRepository =
+                new UserRepository();
+
+        BookRepository bookRepository =
+                new BookRepository();
+
+        BorrowRepository borrowRepository =
+                new BorrowRepository();
+
+        // =========================================
+        // SERVICES
+        // =========================================
+
+        UserService userService =
+                new UserService(userRepository);
+
+        BookService bookService =
+                new BookService(
+                        bookRepository,
+                        borrowRepository,
+                        printer
+                );
+
+        BorrowService borrowService =
+                new BorrowService(
+                        borrowRepository,
+                        userService,
+                        bookService
+                );
+
+        // =========================================
+        // USERS
+        // =========================================
+
+        Client nico =
+                userService.addClientUser(
+                        "Nico",
+                        "Lopez"
+                );
+
+        Admin angel =
+                userService.addAdminUser(
+                        "Angel",
+                        "Sifuentes"
+                );
+
+        // =========================================
+        // BOOKS
+        // =========================================
+
+        Book cleanCode = new Book(
+                1,
+                "Clean Code",
+                "Robert Martin",
+                Book.Genre.TECHNOLOGY
         );
 
-        Client maria = library.addClientUser(
-            "Maria",
-            "Lopez"
+        Book nineteen84 = new Book(
+                2,
+                "1984",
+                "George Orwell",
+                Book.Genre.FICTION
         );
 
-        Admin angel = library.addAdminUser(
-            "Angel",
-            "Sifuentes"
+        Book atomicHabits = new Book(
+                3,
+                "Atomic Habits",
+                "James Clear",
+                Book.Genre.PERIODISM
         );
 
-        // ================= BOOKS =================
-        Book dracula = library.addBook(
-            "Dracula",
-            "Bram Stoker",
-            Book.Genre.HORROR
+        bookRepository.addBook(cleanCode);
+        bookRepository.addBook(nineteen84);
+        bookRepository.addBook(atomicHabits);
+
+        // =========================================
+        // SEARCH TESTS
+        // =========================================
+
+        System.out.println(
+                "\n========== SEARCH BY TITLE ==========\n"
         );
 
-        Book sapiens = library.addBook(
-            "Sapiens",
-            "Yuval Noah Harari",
-            Book.Genre.HISTORY
+        bookService.searchBookByTitle("1984");
+
+        System.out.println(
+                "\n========== SEARCH BY GENRE ==========\n"
         );
 
-        Book meditations = library.addBook(
-            "Meditations",
-            "Marcus Aurelius",
-            Book.Genre.PHILOSOPHY
+        bookService.searchBooksByGenre(
+                Book.Genre.TECHNOLOGY
         );
 
-        Book metamorphosis = library.addBook(
-            "The Metamorphosis",
-            "Franz Kafka",
-            Book.Genre.DRAMA
+        // =========================================
+        // BORROW TEST
+        // =========================================
+
+        System.out.println(
+                "\n========== BORROW BOOK ==========\n"
         );
 
-        Book onePiece = library.addBook(
-            "One Piece",
-            "Eiichiro Oda",
-            Book.Genre.SHONEN
+        borrowService.borrowBook(cleanCode, nico);
+
+        borrowService.borrowBook(atomicHabits, nico);
+
+        // =========================================
+        // USER INVENTORY
+        // =========================================
+
+        System.out.println(
+                "\n========== USER INVENTORY ==========\n"
         );
 
-        // ================= ADMIN TEST =================
-        System.out.println("\n========== ADMIN TEST ==========");
+        printer.printBorrowedBooks(nico);
 
-        angel.addBookToLibrary(
-            library,
-            "No Longer Human",
-            "Osamu Dazai",
-            Book.Genre.PSYCHOLOGY
+        // =========================================
+        // BORROW HISTORY
+        // =========================================
+
+        System.out.println(
+                "\n========== BORROW RECORDS ==========\n"
         );
 
-        angel.showAllUsers(library);
+        bookService.showBorrowedBooksList();
 
-        // ================= BORROW TEST =================
-        System.out.println("\n========== BORROW TEST ==========");
+        // =========================================
+        // RETURN BOOK
+        // =========================================
 
-        nico.requestBook(library, onePiece);
-        nico.requestBook(library, dracula);
+        System.out.println(
+                "\n========== RETURN BOOK ==========\n"
+        );
 
-        maria.requestBook(library, meditations);
+        borrowService.returnBook(
+                nico,
+                cleanCode
+        );
 
-        angel.requestBook(library, sapiens);
+        // =========================================
+        // INVENTORY AFTER RETURN
+        // =========================================
 
-        // ================= RETURN TEST =================
-        System.out.println("\n========== RETURN TEST ==========");
+        System.out.println(
+                "\n========== INVENTORY AFTER RETURN ==========\n"
+        );
 
-        nico.returnBook(onePiece, library);
+        printer.printBorrowedBooks(nico);
+        angel.banUserFromLibrary(nico);
+        printer.printBannedUser(nico);
 
-        // ================= CURRENT INVENTORY =================
-        System.out.println("\n========== CURRENT INVENTORY ==========");
-
-        System.out.println("\n--- NICO CURRENT INVENTORY ---");
-        nico.booksUserIsBorrowing();
-
-        System.out.println("\n--- MARIA CURRENT INVENTORY ---");
-        maria.booksUserIsBorrowing();
-
-        // ================= PAST INVENTORY =================
-        System.out.println("\n========== PAST INVENTORY ==========");
-
-        System.out.println("\n--- NICO PAST INVENTORY ---");
-        nico.booksUserHasBorrowed();
-
-        // ================= SEARCH TEST =================
-        System.out.println("\n========== SEARCH TEST ==========");
-
-        System.out.println("\n--- SEARCH BY ID ---");
-        library.searchBookByID(1);
-
-        System.out.println("\n--- SEARCH BY TITLE ---");
-        library.searchBookByTitle("Dracula");
-
-        System.out.println("\n--- SEARCH BY GENRE ---");
-        library.searchBooksByGenre(Book.Genre.HORROR);
-
-        // ================= BORROW HISTORY =================
-        System.out.println("\n========== BORROW HISTORY ==========");
-
-        library.showBorrowedBooksList();
-
-        // ================= REMOVE BOOK TEST =================
-        System.out.println("\n========== REMOVE BOOK TEST ==========");
-
-        angel.removeBookFromLibrary(library, metamorphosis);
-
-        System.out.println("\n--- SEARCH REMOVED BOOK ---");
-        library.searchBookByTitle("The Metamorphosis");
-
-        // ================= SYSTEM STATUS =================
-        System.out.println("\n========== LIBRARY STATUS ==========");
-
-        System.out.println(library);
+        printer.printUserBannedStatus(nico);
     }
 }

@@ -1,9 +1,16 @@
+package Entities;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import ConsolePrinter.Printer;
+import Services.BorrowService;
 
 public abstract class User {
+
+    //Printer
+    private Printer printer;
 
     //Default atributes
     private String name;
@@ -18,6 +25,7 @@ public abstract class User {
 
     //User:Library
     private boolean isBanned = false;
+    private BorrowService borrowService;
 
     public User(int id, String name, String surname){
         this.id = id;
@@ -52,8 +60,27 @@ public abstract class User {
         return score;
     }
 
+    //Getter sobre el estado de baneo del usuario
     public boolean getBannedUserStatus(){
         return isBanned;
+    }
+
+    //Setter name
+    public void setName(String name){
+        this.name = name;
+    }
+
+    //Setter surname
+    public void setSurname(String surname){
+        this.surname = surname;
+    }
+
+    public Set<Map.Entry<Integer, Book>> getPastInventory(){
+        return userPastInventory.entrySet();
+    }
+
+    public Set<Map.Entry<Integer, Book>> getCurrentInventory(){
+        return userCurrentInventory.entrySet();
     }
 
     //Getter Si el usuario tiene el libro prestado.
@@ -77,10 +104,6 @@ public abstract class User {
         return book.getUserBorrowedTime();
     }
 
-    public void printUserBorrowedBookTime(Book book){
-        System.out.println(getUserBorrowedBookTime(book));
-    }
-
     //Metodo para calcular la reputacion del usuario
     public int calculateScore(){
         return (onTimeReturns * 10) - (lateReturns * 5) - (lostBooks * 20);
@@ -91,8 +114,8 @@ public abstract class User {
         this.score = calculateScore();
     }
 
-    public void updateUserStatus(boolean value){
-        this.isBanned = value;
+    public void updateUserStatus(boolean banned){
+        this.isBanned = banned;
     }
 
      //Metodo auxiliar para sacar score
@@ -106,48 +129,8 @@ public abstract class User {
     }
 
     //Metodo para enviar una solicitud de pedir libros.
-    public void requestBook(Library library, Book book){
-        library.borrowBook(book, this);
-    }
-
-     //Metodo para devolver libros.
-    public void returnBook(Book book, Library library){
-
-        //Comprobar si el usuario tiene el libro
-        if(book.getBorrowedBookUser() != this){
-            System.out.println("Este usuario no tiene el libro");
-            return;
-        }
-
-        //Calculo de la reputacion de user, aumentara si el user devuelve el libro a tiempo
-        //El usuario tambien actualizara el estado sobre cuantos libros ha devuelto. si no cumple el plazo dicho contador aumenta.
-        int limitday = 14;
-
-        int days = (int) ChronoUnit.DAYS.between(
-                book.getUserBorrowedTime(),
-                LocalDate.now()
-        );
-
-        if(days > limitday){
-            this.addLateReturn();
-        } else {
-            this.addOnTimeReturn();
-        }
-
-        //Si por alguna razon al calcular el score saca menos de 0, el usuario esta baneado de la libreria XD
-        this.updateScore();
-        if (this.getScore() < 0){
-            library.banUserFromLibrary(this);
-        }
-
-        book.returnBook();
-        this.removeBooksFromInventory(book);
-        library.markBookAsReturned(this, book);
-
-        System.out.println(
-            "El libro: " + book.getTitle() +
-            " ha sido devuelto por " + this.getName()
-        );
+    public void requestBook(Book book){
+        borrowService.borrowBook(book, this);
     }
 
     //Metodo para agregar un libro al inventario de usuario
@@ -156,34 +139,7 @@ public abstract class User {
         userCurrentInventory.put(userCurrentInventoryID, book);
     }
 
-    //Shows how many books the user borrow Overload of methods.
-
-    //Just to get the past inventory with it's respective id and title
-    public void booksUserHasBorrowed(){
-        for(Map.Entry<Integer,Book> entry : userPastInventory.entrySet()){
-            Book book = entry.getValue();
-            System.out.println("----------------------------------------------");
-            System.out.println(
-            "ItemID: " +  entry.getKey() +
-            " / Book Title: " +book.getTitle()
-            );
-            System.out.println("----------------------------------------------");
-        }
-    }
-
-    //Shows All of the info.
-    public void booksUserHasBorrowed(boolean detailed){
-        if (detailed == true){
-            booksUserHasBorrowed();
-        }
-
-        for(Map.Entry<Integer,Book> entry : userPastInventory.entrySet()){
-            Book book = entry.getValue();
-            book.printAllBookInfo();
-        }
-    }
-
-    //Eliminate books after being returned
+    //Elimina libros ldel inventario luego de devolverlos
     public void removeBooksFromInventory(Book bookToRemove){
 
         for(Map.Entry<Integer, Book> entry : userCurrentInventory.entrySet()){
@@ -199,16 +155,28 @@ public abstract class User {
         }
     }
 
+    //Sobrecarga de metodos para mostrar la cantidad de libros que ha pedido prestado el usuario
+
     //Just to get the past inventory with it's respective id and title
-    public void booksUserIsBorrowing(){
-        for(Map.Entry<Integer,Book> entry : userCurrentInventory.entrySet()){
-            Book book = entry.getValue();
-            System.out.println("----------------------------------------------");
-            System.out.println(
-            "ItemID: " +  entry.getKey() +
-            " / Book Title: " +book.getTitle()
-            );
+    public void booksUserHasBorrowed(){
+        printer.printBorrowedBooks(this);
+    }
+
+    //Muestra la cantidad de libros que el usuario ha pedido prestado alguna vez
+    public void booksUserHasBorrowed(boolean detailed){
+        if (detailed == true){
+            booksUserHasBorrowed();
         }
+
+        for(Map.Entry<Integer,Book> entry : userPastInventory.entrySet()){
+            Book book = entry.getValue();
+            printer.printAllBookInfo(book);
+        }
+    }
+
+    //Solo para conseguir el id y nombre del usuario
+    public void booksUserIsBorrowing(){
+        printer.printCurrentBorrowedBooks(this);
     }
 }
 

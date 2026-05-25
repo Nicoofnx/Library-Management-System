@@ -1,7 +1,10 @@
+package Entities;
 import java.time.LocalDate;
 
 public class Book {
 
+    //GENERAL ATRIBUTES
+    private int id;
     private String title;
     private String author;
     private Genre genre;
@@ -19,13 +22,14 @@ public class Book {
         STORY,
         FABLE,
         COMEDY,
-        SHONEN
+        SHONEN,
+        TECHNOLOGY,
+        FICTION
     }
 
-    private int id;
 
+    //Borrow:User
     private User borrowedBy;
-
     private boolean isBorrowed;
     private LocalDate timeBorrowedBook;
 
@@ -74,43 +78,20 @@ public class Book {
         return borrowedBy;
     }
 
-    //Printea la info general del libro.
-    public void printAllBookInfo(){
-
-    System.out.println("----------------------------------------------");
-    System.out.println(
-        "ID Libro: " + id
-        + "\nTitulo: " + title
-        + "\nAutor: " + author
-        + "\nGenero: " + genre
-        + "\nPrestado: " + (isBorrowed ? "Si" : "No")
-    );
-
-    if(isBorrowed && borrowedBy != null){
-
-        System.out.println(
-            "Prestado a: " + borrowedBy.getName()
-            + "\nFecha de prestamo: " + timeBorrowedBook
-        );
-    }
-    System.out.println("----------------------------------------------");
+    //Setter title
+    public void setTitle(String title){
+        this.title = title;
     }
 
-    //Printea la info general del libro.
-    public void printAllBookInfo(boolean isForUser){
-    if (isForUser == false){
-        printAllBookInfo();
+        //Setter title
+    public void setAuthor(String author){
+        this.title = author;
     }
 
-    System.out.println("----------------------------------------------");
-    System.out.println(
-        "ID Libro: " + id
-        + "\nTitulo: " + title
-        + "\nAutor: " + author
-        + "\nGenero: " + genre
-    );
+        //Setter title
+    public void setGenre(Genre genre){
+        this.genre = genre;
     }
-
 
     public void borrowBook(User user){
         this.isBorrowed = true;
