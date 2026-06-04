@@ -1,0 +1,61 @@
+{
+  "1": {
+    "id": 1,
+    "name": "ke",
+    "surname": "si",
+    "email": "",
+    "password": "qwd",
+    "score": 0,
+    "isBanned": true,
+    "type": "Admin",
+    "userCurrentInventory": {},
+    "userPastInventory": {}
+  },
+  "2": {
+    "id": 2,
+    "name": "hola",
+    "surname": "ju",
+    "email": "quiero",
+    "password": "keke",
+    "score": 20,
+    "isBanned": false,
+    "type": "Admin",
+    "userCurrentInventory": {},
+    "userPastInventory": {
+      "1": {
+        "title": "uwu"
+      },
+      "2": {
+        "title": "kiko"
+      }
+    }
+  },
+  "3": {
+    "id": 3,
+    "name": "hola",
+    "surname": "hijito",
+    "email": "waw",
+    "password": "ita",
+    "score": 0,
+    "isBanned": false,
+    "type": "Admin",
+    "userCurrentInventory": {},
+    "userPastInventory": {}
+  },
+  "4": {
+    "id": 4,
+    "name": "si",
+    "surname": "fue",
+    "email": "jtla",
+    "password": "ilu",
+    "score": 10,
+    "isBanned": false,
+    "type": "Client",
+    "userCurrentInventory": {},
+    "userPastInventory": {
+      "1": {
+        "title": "kiko"
+      }
+    }
+  }
+}

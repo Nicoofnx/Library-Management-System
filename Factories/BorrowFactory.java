@@ -6,7 +6,9 @@ import Entities.Book;
 
 public class BorrowFactory {
     public BorrowRecord createRecord(User user, Book book){
-        BorrowRecord record = new BorrowRecord(user, book);
-        return record;
+        return new BorrowRecord(
+            user,
+            book
+        );
     }
 }

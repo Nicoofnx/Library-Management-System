@@ -2,43 +2,48 @@ package Entities;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import ConsolePrinter.Printer;
-import Services.BorrowService;
+import Services.BookService;
 
 public abstract class User {
 
-    //Printer
-    private Printer printer;
+    //Transient
+    private transient Printer printer;
+    private transient BookService bookService;
 
     //Default atributes
     private String name;
     private String surname;
+    private String password;
+    private String email;
     private int id;
 
     //User:Book
-    private int onTimeReturns;
-    private int lateReturns;
-    private int lostBooks;
+    private transient int onTimeReturns;
+    private transient int lateReturns;
+    private transient int lostBooks;
     private int score;
 
     //User:Library
     private boolean isBanned = false;
-    private BorrowService borrowService;
+    
 
-    public User(int id, String name, String surname){
+    public User(int id, String name, String surname,String email, String password){
         this.id = id;
         this.name = name;
         this.surname = surname;
+        this.email = email;
+        this.password = password;
+
     }
 
     //Inventario de libros de user.
     HashMap<Integer, Book> userPastInventory = new HashMap<>();
-    int userPastInventoryID = 0;
+    private transient int userPastInventoryID = 0;
 
     HashMap<Integer, Book> userCurrentInventory = new HashMap<>();
-    int userCurrentInventoryID = 0;
+    private transient int userCurrentInventoryID = 0;
 
     //Getter ID
     public int getID(){
@@ -53,6 +58,16 @@ public abstract class User {
     //Getter Surname
     public String getSurname(){
         return surname;
+    }
+
+    //Getter Email
+    public String getEmail(){
+        return email;
+    }
+
+    //Getter Email
+    public String getPassword(){
+        return password;
     }
 
     //Getter Score
@@ -75,17 +90,17 @@ public abstract class User {
         this.surname = surname;
     }
 
-    public Set<Map.Entry<Integer, Book>> getPastInventory(){
-        return userPastInventory.entrySet();
+    public Map<Integer, Book> getUserCurrentInventoryMap() {
+        return this.userCurrentInventory; // Devuelve el HashMap/Map real directo
     }
 
-    public Set<Map.Entry<Integer, Book>> getCurrentInventory(){
-        return userCurrentInventory.entrySet();
+    public Map<Integer, Book> getUserPastInventoryMap() {
+        return this.userPastInventory; // Devuelve el HashMap/Map real directo
     }
 
     //Getter Si el usuario tiene el libro prestado.
     public boolean hasUserBorrowedBook(Book book){
-        return book.getBorrowedBookUser() == this; //gpt xd
+        return bookService.getBorrowedByUser(book) == this; //gpt xd
     /* Explicación del método:
 
     El método getBorrowedBookUser() devuelve un objeto de tipo User,
@@ -102,6 +117,16 @@ public abstract class User {
     //Getter -- Printer del tiempo que el usuario tuvo el libro prestado.
     public LocalDate getUserBorrowedBookTime(Book book){
         return book.getUserBorrowedTime();
+    }
+
+    //Getter del ID del userPastInventoryID
+    public int getUserPastInventoryID(){
+        return userPastInventoryID;
+    }
+
+    //Getter del ID del userCurrentInventoryID
+    public int getUserCurrentInventoryID(){
+        return userCurrentInventoryID;
     }
 
     //Metodo para calcular la reputacion del usuario
@@ -128,15 +153,22 @@ public abstract class User {
         onTimeReturns++;
     }
 
-    //Metodo para enviar una solicitud de pedir libros.
-    public void requestBook(Book book){
-        borrowService.borrowBook(book, this);
+    public void displayUserInfo(){
+        if (this.printer == null) {
+            this.printer = new Printer(); 
+        }
+    printer.printUserInfo(this);
     }
 
     //Metodo para agregar un libro al inventario de usuario
-    public void addBookToUserInventory( Book book){
+    public void addBookToUserInventory(Book book){
         userCurrentInventoryID++;
+        if (this.userCurrentInventory == null) {
+            this.userCurrentInventory = new HashMap<>();
+        }
+
         userCurrentInventory.put(userCurrentInventoryID, book);
+        
     }
 
     //Elimina libros ldel inventario luego de devolverlos
@@ -159,11 +191,18 @@ public abstract class User {
 
     //Just to get the past inventory with it's respective id and title
     public void booksUserHasBorrowed(){
+        if (this.printer == null) {
+        this.printer = new Printer(); // 
+    }
         printer.printBorrowedBooks(this);
     }
 
     //Muestra la cantidad de libros que el usuario ha pedido prestado alguna vez
     public void booksUserHasBorrowed(boolean detailed){
+        if (this.printer == null) {
+        this.printer = new Printer(); // 
+        }
+
         if (detailed == true){
             booksUserHasBorrowed();
         }
@@ -176,10 +215,15 @@ public abstract class User {
 
     //Solo para conseguir el id y nombre del usuario
     public void booksUserIsBorrowing(){
-        printer.printCurrentBorrowedBooks(this);
+    if (this.printer == null) {
+        this.printer = new Printer(); // 
     }
-}
+    System.out.println("Esta es la lista de los libros que tienes en tu inventario.");
+    printer.printCurrentBorrowedBooks(this);
+    }
+    
 
+}
 
 
 

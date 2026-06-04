@@ -3,9 +3,10 @@ import java.time.LocalDate;
 
 public class BorrowRecord {
 
-    private User user;
-    private Book book;
-
+    private transient User user;
+    private transient Book book;
+    private int userID;
+    private int bookID;
     private LocalDate borrowDate;
     private LocalDate returnDate;
 
@@ -14,6 +15,8 @@ public class BorrowRecord {
     public BorrowRecord(User user, Book book) {
         this.user = user;
         this.book = book;
+        this.userID = user.getID();
+        this.bookID = book.getID();
         this.borrowDate = LocalDate.now();
         this.returnDate = null;
         this.returned = false;
@@ -34,9 +37,19 @@ public class BorrowRecord {
         return user;
     }
 
+    //Getter userID
+    public int getUserID() {
+        return this.userID;
+    }
+
     //Getter book
     public Book getBook() {
         return book;
+    }
+
+    //Getter userID
+    public int getBookID() {
+        return this.bookID;
     }
 
     //Getter fecha de prestamo
@@ -68,12 +81,16 @@ public class BorrowRecord {
 
     @Override
     public String toString() {
-        return "BorrowRecord {" +
-                "User: " + user.getName() + " " + user.getSurname() +
-                ", Book: " + book.getTitle() +
-                ", BorrowDate: " + borrowDate +
-                ", ReturnDate: " + (returnDate != null ? returnDate : "NOT RETURNED") +
-                ", Status: " + (returned ? "RETURNED" : "BORROWED") +
-                "}";
-    }
+    String userInfo = (user != null) ? (user.getName() + " " + user.getSurname()) : "USUARIO ELIMINADO";
+    
+    String bookInfo = (book != null) ? book.getTitle() : "LIBRO NO ENCONTRADO (ID: " + this.bookID + ")";
+
+    return "BorrowRecord {" +
+            "User: " + userInfo +
+            ", Book: " + bookInfo +
+            ", BorrowDate: " + borrowDate +
+            ", ReturnDate: " + (returnDate != null ? returnDate : "NOT RETURNED") +
+            ", Status: " + (returned ? "RETURNED" : "BORROWED") +
+            "}";
+}
 }

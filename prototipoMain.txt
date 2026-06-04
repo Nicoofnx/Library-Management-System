@@ -1,0 +1,743 @@
+
+El codigo antes de pasarlo a ia
+El prompt fue que documente algunas cosas que haya cambiado en version cavernicola, si encuentra bugs que lo haga saber.
+En cavernicola para que hasta yo sepa lo que hice Xd
+
+
+import ConsolePrinter.Printer;
+
+import Entities.Admin;
+
+import Entities.Book;
+
+import Entities.BorrowRecord;
+
+import Entities.Client;
+
+import Entities.User;
+
+import Entities.Book.Genre;
+
+import Repositories.BookRepository;
+
+import Repositories.BorrowRepository;
+
+import Repositories.UserRepository;
+
+
+
+import Services.BookService;
+
+import Services.BorrowService;
+
+import Services.UserService;
+
+
+
+public class Main{
+
+    private static final Scanner input = new Scanner(System.in);
+
+    private static UserService userService;
+
+    private static BookRepository bookRepository;
+
+    private static BookService bookService;
+
+    private static BorrowRepository borrowRepository;
+
+    private static BorrowService borrowService;
+
+
+
+    public static String askString(String message) {
+
+        System.out.print(message);
+
+        return input.nextLine();
+
+    }
+
+
+
+    public static int askInt(String message) {
+
+        System.out.print(message);
+
+        int value = Integer.parseInt(input.nextLine());
+
+        return value;
+
+    }
+
+
+
+   
+
+public static void main(String[] args) {
+
+
+
+Printer printer = new Printer();
+
+
+
+
+
+
+
+    UserRepository userRepository = new UserRepository();
+
+
+
+    userService = new UserService(userRepository);
+
+
+
+
+
+    bookRepository = new BookRepository();
+
+
+
+    borrowRepository =
+
+    new BorrowRepository(userRepository);
+
+    borrowRepository.linkUsersToRecords(userRepository, bookRepository); //Parece ser que no me printeban los titulos del borrowRecord porque era nulo
+
+    //garantiza que bookRepository quien tiene todos los libros en memoria carguen para el programa, si no le pedia a la IA jamas la hacia XD.
+
+
+
+    bookService =new BookService(
+
+                        bookRepository,
+
+                        userRepository,
+
+                        borrowRepository,
+
+                        printer
+
+                );
+
+
+
+    borrowService =new BorrowService(
+
+                        borrowRepository,
+
+                        userService,
+
+                        bookService,
+
+                        bookRepository,
+
+                        userRepository
+
+                );
+
+
+
+
+
+    Boolean isRunning = true;
+
+    while (isRunning){
+
+        User loggedUser = null;
+
+        Boolean userLogged = false;
+
+        printer.printWelcome();
+
+        String responseQ1 = input.nextLine();
+
+
+
+        if (responseQ1.equalsIgnoreCase("No")){
+
+
+
+            System.out.println("Es administrador?");
+
+            String responseQ2 = askString("Responda con Si/No.");
+
+
+
+            if (responseQ2.equalsIgnoreCase("Si")) {
+
+                registerAdminUser();
+
+            }  
+
+            if (responseQ2.equalsIgnoreCase("No")){
+
+                registerClientUser();
+
+            }
+
+        }
+
+       
+
+        if(responseQ1.equalsIgnoreCase("Si")){
+
+            loggedUser = loginUser();
+
+
+
+            if (loggedUser != null){
+
+                userLogged = true;
+
+            }
+
+        }
+
+
+
+        if (userLogged == true && loggedUser instanceof Admin){
+
+            adminMenu((Admin)loggedUser);
+
+        }
+
+
+
+        if (userLogged == true && loggedUser instanceof Client){
+
+            clientMenu((Client)loggedUser);
+
+        }
+
+        }
+
+   
+
+    }
+
+    public static void registerAdminUser(){
+
+        System.out.println("Entendido usted es un Administrador");
+
+        System.out.println("Ingrese su nombre y apellido");
+
+        String nameUser = askString("Nombre: ");
+
+        String surnameUser = askString("Apellido: ");
+
+        String emailUser = askString("Email: ");
+
+        String passwordUser = askString("Contraseña: ");
+
+        userService.addAdminUser(nameUser,surnameUser,emailUser,passwordUser);
+
+        System.out.println("Registrado con exito");
+
+    }
+
+
+
+    public static void registerClientUser(){
+
+        System.out.println("Entendido usted es un Cliente");
+
+        System.out.println("Ingrese su nombre y apellido");
+
+        String nameUser = askString("Nombre: ");
+
+        String surnameUser = askString("Apellido: ");
+
+        String emailUser = askString("Email: ");
+
+        String passwordUser = askString("Contraseña: ");
+
+        userService.addClientUser(nameUser,surnameUser,emailUser,passwordUser);
+
+        System.out.println("Registrado con exito");
+
+    }
+
+
+
+
+
+    public static User loginUser(){
+
+    User loggedUser = null;
+
+    while(loggedUser == null){
+
+        String emailLogin = askString("Email: ");
+
+        String passwordLogin = askString("Contraseña: ");
+
+
+
+        loggedUser = userService.login(emailLogin,passwordLogin);
+
+        if(loggedUser == null){
+
+            System.out.println("Credenciales incorrectas");
+
+
+
+            String option = askString(
+
+                "1. Intentar nuevamente\n" +
+
+                "2. Registrarme\n"
+
+            );
+
+
+
+            if(option.equals("2")){
+
+                String response = askString("¿Es administrador? (Si/No): ");
+
+
+
+                if(response.equalsIgnoreCase("Si")){
+
+                    registerAdminUser();
+
+                }
+
+                else{
+
+                    registerClientUser();
+
+                }
+
+
+
+                return null;
+
+            }
+
+        }
+
+    }
+
+
+
+    System.out.println("Bienvenido " +loggedUser.getName());
+
+    return loggedUser;
+
+    }
+
+   
+
+    public static void clientMenu(Client userClient){
+
+
+
+        boolean logOut = false;
+
+        while (!logOut) {
+
+        System.out.println("----------------------------------------------");
+
+            System.out.println("Que haremo' hoy " + userClient.getName() +"?");
+
+            String opciones = askString(
+
+                    "1. Pedir prestado un libro \n" +
+
+                    "2. Devolver un libro\n" +
+
+                    "3. Buscar libros \n" +
+
+                    "4. Cerrar sesion \n"
+
+            );
+
+
+
+            switch (opciones) {
+
+            case "1": requestBookMenu(userClient); break;
+
+            case "2": returnBookMenu(userClient); break;
+
+            case "3": searchBooksMenu(); break;
+
+            case "4": logOut = true; break;    
+
+            }
+
+        }
+
+    }
+
+
+
+    public static void adminMenu(Admin userAdmin){
+
+
+
+        boolean logOut = false;
+
+        while (!logOut) {
+
+        System.out.println("----------------------------------------------");
+
+            System.out.println("Que haremo' hoy " + userAdmin.getName() +"?");
+
+            String opciones = askString(
+
+                    "1. Banear/Desbanear un usuario\n" +
+
+                    "2. Añadir/Eliminar un libro\n" +
+
+                    "3. Mostrar los registros de prestamo\n" +
+
+                    "4. Pedir prestado un libro \n" +
+
+                    "5. Buscar libros \n" +
+
+                    "6. Devolver un libro\n" +
+
+                    "7. Cerrar sesión \n"
+
+            );
+
+
+
+            switch (opciones) {
+
+            case "1": menuBanUser(); break;
+
+            case "2": elimOrAddBookMenu(); break;
+
+            case "3": showRecordsMenu(); break;
+
+            case "4": requestBookMenu(userAdmin); break;
+
+            case "5": searchBooksMenu(); break;
+
+            case "6": returnBookMenu(userAdmin); break;
+
+            case "7": logOut = true; break;    
+
+            }
+
+        }
+
+    }
+
+
+
+    public static void menuBanUser(){
+
+        System.out.println("----------------------------------------------");
+
+        System.out.println("Selecciono des/banear a un usuario");
+
+        String opciones = askString(
+
+            "1. Banear usuario \n" +
+
+            "2. Desbanear usuario \n"
+
+        );
+
+        switch (opciones) {
+
+            case "1":
+
+                int userIDForBan = askInt("Adjunte el ID del usuario: ");
+
+                userService.banUserFromLibrary(userIDForBan);
+
+                System.out.println("----------------------------------------------");
+
+                break;
+
+       
+
+            case "2":
+
+                /*int*/userIDForBan = askInt("Adjunte el ID del usuario: ");
+
+                userService.unbanUserFromLibrary(userIDForBan);
+
+                System.out.println("----------------------------------------------");
+
+                break;  
+
+            default:
+
+                System.out.println("Selecione una opcion valida.");
+
+                System.out.println("----------------------------------------------");
+
+                break;
+
+        }
+
+       
+
+    }
+
+
+
+    public static void elimOrAddBookMenu(){
+
+        System.out.println("----------------------------------------------");
+
+        System.out.println("Selecciono Añadir/Eliminar un libro");
+
+        String options2 = askString(
+
+            "1. Añadir libro \n" +
+
+            "2. Eliminar libro \n"
+
+        );
+
+        System.out.println("----------------------------------------------");
+
+            switch(options2){
+
+                case "1":
+
+                System.out.println("----------------------------------------------");
+
+                System.out.println("Usted selecciono añadir un libro");
+
+                String inputTitleName = askString("Titulo del libro: ");
+
+                String inputAuthorName = askString("Nombre del autor: ");
+
+                String inputGenreBook = askString("Genero del libro: ");
+
+                Genre genre = Genre.valueOf(inputGenreBook.trim().toUpperCase());
+
+                bookService.addBook(inputTitleName, inputAuthorName, genre);
+
+                System.out.println("Se creo el libro con exito.");
+
+                System.out.println("----------------------------------------------");
+
+                break;
+
+
+
+                case "2":
+
+                System.out.println("----------------------------------------------");
+
+                System.out.println("Usted selecciono eliminar un libro");
+
+                Book foundBook = null;
+
+                while (foundBook == null){
+
+                    String tituloLibroEliminar = askString("Ingrese el titulo del libro a eliminar: ");
+
+                    foundBook = bookRepository.getBookbyTitle(tituloLibroEliminar);
+
+                    System.out.println("Error, libro no encontrado, asegurese de que sea el libro correcto.");
+
+                        if(foundBook != null){
+
+                                break;
+
+                            }
+
+                        }
+
+                    bookRepository.deleteBook(foundBook.getID());
+
+                    System.out.println("Libro eliminado con exito");
+
+                    System.out.println("----------------------------------------------");
+
+                    break;
+
+                       
+
+                    default:
+
+                    System.out.println("----------------------------------------------");
+
+                    System.out.println("Opción inválida xd.");
+
+                    System.out.println("----------------------------------------------");
+
+                    break;
+
+                }
+
+    }
+
+
+
+    public static void showRecordsMenu(){
+
+        System.out.println("Has seleccionado mostar los registros de prestamo");
+
+        for(Map.Entry<Integer,BorrowRecord> recordsEntry : borrowRepository.getAllRecordwithID()){
+
+            int ID = recordsEntry.getKey();
+
+            BorrowRecord record  = recordsEntry.getValue();
+
+
+
+            System.out.println(ID);
+
+            System.out.println(record);
+
+        }
+
+    }
+
+
+
+    public static void requestBookMenu(User user){
+
+        System.out.println("----------------------------------------------");
+
+        System.out.println("Has seleccionado pedir prestado un libro");
+
+        Book requestedBook = null;
+
+        while (requestedBook == null) {
+
+            String requestBookInput = askString("Escriba el titulo del libro que quiera solicitar: ");
+
+            requestedBook = borrowService.requestBookByTitle(requestBookInput.trim(), user.getID());
+
+            System.out.println("No se pudo realizar el préstamo. Verifica que el libro exista o esté disponible.");
+
+        }
+
+        if (requestedBook != null) {
+
+            System.out.println("Se ha transferido el libro: " + requestedBook.getTitle() + " a tu inventario.");
+
+        }
+
+           
+
+       
+
+        System.out.println("----------------------------------------------");
+
+    }
+
+
+
+    public static void searchBooksMenu(){
+
+        System.out.println("----------------------------------------------");
+
+        System.out.println("Has seleccionado buscar libros");
+
+        String options3 = askString(
+
+            "1. Busar por titulo\n" +
+
+            "2. Buscar por genero\n" +
+
+            "3. Buscar por autor \n"
+
+        );
+
+            switch (options3) {
+
+            case "1":
+
+            String searchBookByTitleInput = askString("Ingrese el titulo del libro: ");
+
+            bookService.searchBookByTitle(searchBookByTitleInput.trim());
+
+            System.out.println("----------------------------------------------");
+
+            break;
+
+            case "2":
+
+            String searchBookByGenderInput = askString("Ingrese el genero del libro: ");
+
+            Genre genreOfSearchedBook = Genre.valueOf(searchBookByGenderInput.trim().toUpperCase());
+
+            bookService.searchBooksByGenre(genreOfSearchedBook);
+
+            System.out.println("----------------------------------------------");
+
+            break;
+
+
+
+            case "3":
+
+            String searchBookByAuthorInput = askString("Ingresa el nombre del autor: ");
+
+            bookService.searchBooksByAuthor(searchBookByAuthorInput.trim());
+
+            System.out.println("----------------------------------------------");
+
+            break;
+
+
+
+            default:
+
+            System.out.println("Opción inválida xd.");
+
+            System.out.println("----------------------------------------------");
+
+            break;
+
+        }
+
+    }
+
+
+
+    public static void returnBookMenu(User user){
+
+        Boolean notReturned = true;
+
+        Book bookToReturn = null;
+
+        System.out.println("----------------------------------------------");
+
+        System.out.println("Has seleccionado devolver el libro");
+
+        user.booksUserIsBorrowing();
+
+            while(notReturned){
+
+                    int idOfTheBookToReturnInput = askInt("Escribe el ID del libro que deseas devolver: ");
+
+                    bookToReturn = bookRepository.getBook(idOfTheBookToReturnInput);
+
+                    borrowService.returnBook(user,bookToReturn);
+
+                    Boolean isStillBorrowed = bookToReturn.getStatusBorrowedBook();
+
+                if(!isStillBorrowed){
+
+                        System.out.println("Se ha devuelto el libro:" + bookToReturn.getTitle());
+
+                        break;
+
+                }
+
+                System.out.println("No se pudo devolver el libro.");
+
+            }
+
+        System.out.println("----------------------------------------------");
+
+    }
+
+}  

@@ -1,0 +1,18 @@
+{
+  "1": {
+    "id": 1,
+    "title": "uwu",
+    "author": "owo",
+    "genre": "HORROR",
+    "borrowedByUserID": 0,
+    "isBorrowed": false
+  },
+  "2": {
+    "id": 2,
+    "title": "kiko",
+    "author": "nono",
+    "genre": "PSYCHOLOGY",
+    "borrowedByUserID": 0,
+    "isBorrowed": false
+  }
+}

@@ -2,7 +2,6 @@ package Entities;
 import java.util.Map;
 
 import ConsolePrinter.Printer;
-
 import Repositories.BookRepository;
 import Repositories.BorrowRepository;
 
@@ -10,13 +9,12 @@ public class Admin extends User {
     private Printer printer;
     private BookRepository bookRepository;
     private BorrowRepository borrowRepository;
-    private User user;
 
     private int bookID = 0;
 
 
-    public Admin(int id, String name, String surname) {
-        super(id, name, surname);
+    public Admin(int id, String name, String surname, String email, String password) {
+        super(id, name, surname, email , password);
     }
     
     //Añade libros a la libreria
@@ -32,7 +30,7 @@ public class Admin extends User {
             int BookIDToRemove = entry.getKey();
             Book bookInList = entry.getValue();
             if(bookInList.equals(bookToRemove)){
-                bookRepository.removeBook(BookIDToRemove);
+                bookRepository.deleteBook(BookIDToRemove);
                 break;
             }
         }
@@ -46,14 +44,5 @@ public class Admin extends User {
 
     public void showAllUsers(){
         printer.printAllUsers();
-    }
-
-    //Sistema de BANEOS
-    public void banUserFromLibrary(User user){
-        user.updateUserStatus(true);
-    }
-    
-    public void unbanUserFromLibrary(User user){
-        user.updateUserStatus(false);
     }
 }

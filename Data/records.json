@@ -1,0 +1,16 @@
+{
+  "1": {
+    "userID": 2,
+    "bookID": 1,
+    "borrowDate": "2026-06-04",
+    "returnDate": "2026-06-04",
+    "returned": true
+  },
+  "2": {
+    "userID": 4,
+    "bookID": 2,
+    "borrowDate": "2026-06-04",
+    "returnDate": "2026-06-04",
+    "returned": true
+  }
+}

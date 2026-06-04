@@ -9,27 +9,27 @@ public class Book {
     private String author;
     private Genre genre;
 
-    public enum Genre{
-        SCIENCEFICTION,
-        ROMANCE,
-        HORROR,
-        PHILOSOPHY,
-        HISTORY,
-        PSYCHOLOGY,
-        PERIODISM,
-        SOCIOLOGY,
-        DRAMA,
-        STORY,
-        FABLE,
-        COMEDY,
-        SHONEN,
-        TECHNOLOGY,
-        FICTION
-    }
-
+    public enum Genre {
+    //Me quede sin ideas, gracias crisol XD
+    CIENCIAFICCION,
+    ROMANCE,
+    TERROR,          
+    FILOSOFIA,
+    HISTORIA,
+    PSICOLOGIA,
+    PERIODISMO,     
+    SOCIOLOGIA,
+    DRAMA,
+    CUENTO,          
+    FABULA,
+    COMEDIA,
+    SHONEN,          
+    TECNOLOGIA,
+    FICCION
+}
 
     //Borrow:User
-    private User borrowedBy;
+    private int borrowedByUserID;
     private boolean isBorrowed;
     private LocalDate timeBorrowedBook;
 
@@ -39,6 +39,7 @@ public class Book {
         this.author = author;
         this.genre = genre;
 
+        this.borrowedByUserID =  0;
         this.isBorrowed = false;
         this.timeBorrowedBook = null;
     }
@@ -73,9 +74,9 @@ public class Book {
         return timeBorrowedBook;
     }
 
-    //Getter para conseguir el usuario al que se le presto el libro.
-    public User getBorrowedBookUser(){
-        return borrowedBy;
+    //Getter del id del usuario que tomo libro prestado
+    public int getBorrowedByUserID(){
+        return borrowedByUserID;
     }
 
     //Setter title
@@ -83,32 +84,39 @@ public class Book {
         this.title = title;
     }
 
-        //Setter title
+    //Setter Author
     public void setAuthor(String author){
         this.title = author;
     }
 
-        //Setter title
+    //Setter Genre
     public void setGenre(Genre genre){
         this.genre = genre;
     }
 
+    public void setBorrowedByUserID(int userID){
+        this.borrowedByUserID = userID;
+    }
+
+
+
     public void borrowBook(User user){
+        this.borrowedByUserID = user.getID();
         this.isBorrowed = true;
-        this.borrowedBy = user;
         this.timeBorrowedBook = LocalDate.now();
+        
     }
 
     public void returnBook(){
+        this.borrowedByUserID = 0;
         this.isBorrowed = false;
-        this.borrowedBy = null;
         this.timeBorrowedBook = null;
     }
 
     @Override
     public String toString() {
-        return "Titulo: " + title +
-            ", Autor: " + author +
-            ", Genero: " + genre;
+        return "Titulo: " + title + "\n" +
+            " Autor: " + author +  "\n" +
+            " Genero: " + genre;
     }
 }
